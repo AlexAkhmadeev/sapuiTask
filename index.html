@@ -58,6 +58,7 @@
                     <footer>
                         <Toolbar>
                             <ToolbarSpacer />
+                            <Button text="Сортировать" press="onOpenPopover" icon="sap-icon://sort"/>
                             <Button text="Добавить" press="onAddCategory" icon="sap-icon://add" />
                         </Toolbar>
                     </footer>
@@ -194,6 +195,33 @@
             <Label text="Изменить число" />
             <Input valueLiveUpdate="true" value="{/editableCounter}" />
         </mvc:View>    
+    </script>
+
+    <!-- Popover для сортировки  -->
+    <script id="selectSorterPopover" type="ui5/fragment">
+        <core:FragmentDefinition
+            xmlns="sap.m"
+            xmlns:core="sap.ui.core">
+            <Popover
+                showHeader="false"
+                contentWidth="200px"
+                contentHeight="100px"
+                placement="Bottom" >
+                <NavContainer
+                    id="navCon">
+                    <Page
+                        id="master"
+                        title="Сортировать по">
+                        <Toolbar>
+                            <content>
+                                <Button text="Имени" width="50%" press="onOrderByTitle"/>
+                                <Button text="Числу" width="50%" press="onOrderByCounter"/>
+                            </content>
+                        </Toolbar>
+                    </Page>
+                </NavContainer>
+            </Popover>
+        </core:FragmentDefinition>
     </script>
 
     <!-- Подключение страниц -->
@@ -368,6 +396,52 @@
             var oBinding = oList.getBinding('items');
             oBinding.filter(aFilter);
         },
+
+        /**
+         * Открытие sap.m.Popover
+         * @param oEvent событие
+         */
+        onOpenPopover: function (oEvent) {
+
+            if (!this._oPopover) {
+                this._oPopover = sap.ui.xmlfragment({
+                    fragmentContent: jQuery('#selectSorterPopover').html()},
+                        this);
+                this._oPopover.setPlacement(sap.m.PlacementType.Top);
+                this.getView().addDependent(this._oPopover);
+            }
+
+            var oButton = oEvent.getSource();
+            jQuery.sap.delayedCall(0, this, function () {
+                this._oPopover.openBy(oButton);
+            });
+
+        },
+
+        /**
+         * Ф-я сортировки по заголовку
+         */
+        onOrderByTitle: function () {
+            var oView = this.getView();
+            var oList = oView.byId('categoryList');
+            var oSorter = new sap.ui.model.Sorter('name');
+            oList.getBinding('items').sort(oSorter);
+            this._oPopover.close();
+        },
+
+        /**
+         * Ф-я сортировки по числу
+         */
+        onOrderByCounter: function () {
+            var oView = this.getView();
+            var oList = oView.byId('categoryList');
+            var oSorter = new sap.ui.model.Sorter('counter');
+            oSorter.fnCompare = function(previous, next) {
+                return previous - next;
+            }
+            oList.getBinding('items').sort(oSorter);
+            this._oPopover.close();
+        }
     });
 
     // Controller definition 4 Detail
@@ -493,10 +567,12 @@
             sap.m.MessageToast.show(message, {width: '20em'});
           }
     });
+
     var splitApp = new sap.m.SplitApp({
         masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1').html()})],
         detailPages: [sap.ui.xmlview('myView2', {viewContent:jQuery('#view2').html()})]
     });
+    
     var shell = sap.m.Shell({
         showLogout:false,
         app:splitApp
