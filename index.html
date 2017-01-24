@@ -6,15 +6,6 @@
 
         <title>Просмотр товара</title>
 
-        <style type="text/css">
-            /* все элементы VBox'a с шириной во всю строку */
-            #myView2--idVBox > div {
-                width: 100%;
-            }
-        </style>
-
-        <!-- src="https://openui5.hana.ondemand.com/resources/sap-ui-core.js" -->
-
         <script
             id="sap-ui-bootstrap"
             type="text/javascript"
@@ -85,7 +76,7 @@
                                 <ObjectStatus text="Доступен" state="Success" />
                             </firstStatus>
                         </ObjectHeader>
-                        <VBox id="idVBox" direction="Column" alignItems="Center">
+                        <VBox id="idVBox" direction="Column">
                             <items>
                                 <IconTabBar
                                     select="handleIconTabBarSelect"
@@ -444,7 +435,6 @@
         }
     });
 
-    // Controller definition 4 Detail
     sap.ui.controller('local.controller.Detail', {
 
         /**
@@ -569,15 +559,17 @@
     });
 
     var splitApp = new sap.m.SplitApp({
-        masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1').html()})],
-        detailPages: [sap.ui.xmlview('myView2', {viewContent:jQuery('#view2').html()})]
+        masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1')
+            .html()})],
+        detailPages: [sap.ui.xmlview('myView2', {viewContent:jQuery('#view2')
+            .html()})]
     });
-    
+
     var shell = sap.m.Shell({
         showLogout:false,
         app:splitApp
-    })
-    // oView.setModel(new sap.ui.model.json.JSONModel("https://openui5.hana.ondemand.com/test-resources/sap/ui/demokit/explored/products.json"));
+    });
+
     shell.placeAt('content');
     </script>
 
