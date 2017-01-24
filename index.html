@@ -198,6 +198,20 @@
         </mvc:View>    
     </script>
 
+    <!-- Форма редактирования категорий -->
+    <script id="editCategoryForm" type="sapui5/xmlview">
+        <mvc:View
+            controllerName="local.controller.Master"
+            xmlns="sap.m"
+            xmlns:sap.ui.core="sap.ui.core"
+            xmlns:mvc="sap.ui.core.mvc" >
+            <Label text="Изменить заголовок" />
+            <Input valueLiveUpdate="true" value="{/editableName}" />
+            <Label text="Изменить число" />
+            <Input valueLiveUpdate="true" value="{/editableCounter}" />
+        </mvc:View>    
+    </script>
+
     <!-- Подключение страниц -->
     <script>
     'use strict';
@@ -291,6 +305,66 @@
                 }}));
 
             oDialog1.open();
+        },
+
+        /**
+         * Редактирование категории
+         * @param oEvent событие
+         */
+        onEditCategory: function (oEvent) {
+            var oView = this.getView();
+            var oModel = oView.getModel();
+
+            // Получить индекс выбранной категории
+            var sPath = oEvent.getSource().getBindingContext().getPath();
+            var index = sPath.split('').pop();
+
+            oModel.setProperty('/editableName', 
+                             oModel.getProperty('/categories/' + index +
+                              '/name'));
+            oModel.setProperty('/editableCounter', 
+                             oModel.getProperty('/categories/' + index +
+                              '/counter'));
+
+            oView.setModel(oModel);
+
+            var _this = this;
+            var oDialog1 = new sap.m.Dialog();
+
+            var form = sap.ui
+                .xmlview({viewContent:jQuery('#editCategoryForm')
+                    .html()});
+
+            oDialog1.setTitle('Редактирование категории');
+            oDialog1.addContent(form);
+
+            oDialog1.addButton(new sap.m.Button({text: 'Отмена',
+                press: function () { oDialog1.close();}}));
+
+            oDialog1.addButton(new sap.m.Button({text: 'Сохранить',
+                press: function () { 
+                    var name = oModel.getProperty('/editableName');
+                    var counter = oModel.getProperty('/editableCounter');
+
+                    if (name &&
+                        counter &&
+                        !isNaN(counter) &&
+                        (counter > 0)
+                        ) {
+
+                        oModel.setProperty('/categories/'+index+'/name',
+                                           name);
+                        oModel.setProperty('/categories/'+index+'/counter',
+                                           Number(counter));
+                    }
+
+                    _this.getView().setModel(oModel);
+
+                    oDialog1.close();
+                }}));
+
+            oDialog1.open();
+
         }
     });
 
