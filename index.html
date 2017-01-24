@@ -166,7 +166,7 @@
                         <Toolbar>
                             <content>
                                 <ToolbarSpacer />
-                                <Button text="Добавить в корзину" icon="sap-icon://add" />
+                                <Button text="Добавить в корзину" press="onAddToBasket" icon="sap-icon://add" />
                             </content>
                         </Toolbar>
                     </footer>
@@ -379,9 +379,9 @@
     // Controller definition 4 Detail
     sap.ui.controller('local.controller.Detail', {
 
-               /**
-        * Инициализация 
-        */
+        /**
+         * Инициализация 
+         */
         onInit: function () {
 
             /**
@@ -457,6 +457,36 @@
             }
 
         },
+
+        /**
+         * Обработчик выбора товаров
+         * @param oEvent событие
+         */
+        onSelectionChange: function (oEvent) {
+            var oList = oEvent.getSource();
+            this.aContexts = oList.getSelectedContexts();
+        },
+
+        /**
+         * Обрабочик добавления товаров в корзину
+         */
+        onAddToBasket: function () {
+            var oModel = this.getView().getModel();
+            var goods = oModel.getProperty('/goods');
+            var message = 'Пожалуйста, выберите товары!';
+
+            if (this.aContexts) {
+                if (this.aContexts.length) {
+                    message = '';
+                    this.aContexts.forEach(function (item) {
+                      var index = item.sPath.split('').pop();
+                      message += goods[index].title + '\n';
+                    });
+                }
+            }
+
+            sap.m.MessageToast.show(message, {width: '20em'});
+          }
     });
     var splitApp = new sap.m.SplitApp({
         masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1').html()})],
