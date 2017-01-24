@@ -44,17 +44,21 @@
                         </Toolbar>
                     </subHeader>
                     <content>
-                        <List id="categoryList" noDataText="Нет данных">
+                        <List id="categoryList"
+                         items="{/categories}"
+                         noDataText="Нет данных">
                             <items>
-                                <StandardListItem type="Active" counter="5" title="Категория 1" press=".pressExample"/>
-                                <StandardListItem type="Active" counter="2" title="Категория 2" press=".pressExample"/>
-                                <StandardListItem type="Active" counter="4" title="Категория 3" press=".pressExample"/>
-                                <StandardListItem type="Active" counter="7" title="Категория 4" press=".pressExample"/>
+                                <StandardListItem type="Active"
+                                 counter="{counter}" 
+                                 title="{name}" 
+                                 press="onEditCategory"/>
                             </items>
                         </List>
                     </content>
                     <footer>
                         <Toolbar>
+                            <ToolbarSpacer />
+                            <Button text="Добавить" press="onAddCategory" icon="sap-icon://add" />
                         </Toolbar>
                     </footer>
                 </Page>
@@ -178,30 +182,132 @@
                     </footer>
                 </Page>
             </mvc:View>
-        </script>
+    </script>
 
-        <!-- Подключение страниц -->
-        <script>
-            // Controller definition 4 Master
-            sap.ui.controller("local.controller.Master", {
-                pressExample: function(oEvent) {
-                  alert('Нажат элемент '+oEvent.getSource().getTitle());
-                }
-            });
-            // Controller definition 4 Detail
-            sap.ui.controller("local.controller.Detail", {
-            });
-            var splitApp = new sap.m.SplitApp({
-                masterPages: [sap.ui.xmlview("myView1", {viewContent:jQuery('#view1').html()})],
-                detailPages: [sap.ui.xmlview("myView2", {viewContent:jQuery('#view2').html()})]
-            });
-            var shell = sap.m.Shell({
-                showLogout:false,
-                app:splitApp
-            })
-            // oView.setModel(new sap.ui.model.json.JSONModel("https://openui5.hana.ondemand.com/test-resources/sap/ui/demokit/explored/products.json"));
-            shell.placeAt('content');
-        </script>
+    <!-- Форма добавления категорий -->
+    <script id="addCategoryForm" type="sapui5/xmlview">
+        <mvc:View
+            controllerName="local.controller.Master"
+            xmlns="sap.m"
+            xmlns:sap.ui.core="sap.ui.core"
+            xmlns:mvc="sap.ui.core.mvc" >
+            <Label text="Заголовок" />
+            <Input value="{/newName}" />
+            <Label text="Число" />
+            <Input value="{/newCounter}" />
+        </mvc:View>    
+    </script>
+
+    <!-- Подключение страниц -->
+    <script>
+    'use strict';
+
+    // Используемые конструкторы
+    var Filter = sap.ui.model.Filter;
+    var JSONModel = sap.ui.model.json.JSONModel;
+    var Fragment = sap.ui.core.Fragment;
+
+    /**
+     * Модель категорий
+     * @type {JSONModel}
+     */
+    var oCategories = new JSONModel({
+        categories: [
+            {
+              name: 'Категория 1',
+              counter: 5,
+            },
+            {
+              name: 'Категория 2',
+              counter: 2,
+            },
+            {
+              name: 'Категория 3',
+              counter: 4,
+            },
+            {
+              name: 'Категория 4',
+              counter: 7,
+            },
+        ]
+    }); 
+
+    sap.ui.getCore().setModel(oCategories);
+
+    sap.ui.controller('local.controller.Master', {
+
+        /**
+         * Создание категории
+         */
+        onAddCategory: function () {
+            var oView = this.getView();
+            var oModel = oView.getModel();
+
+            var _this = this;
+            var oDialog1 = new sap.m.Dialog();
+            var form = sap.ui.xmlview({viewContent:jQuery('#addCategoryForm')
+                .html()});
+
+            oDialog1.setTitle('Добавление категории');
+            oDialog1.addContent(form);
+
+            oDialog1.addButton(new sap.m.Button({text: 'Отмена',
+                press: function () { 
+
+                    // Удалить данные из модели
+                    oModel.setProperty('/newName', null);
+                    oModel.setProperty('/newCounter', null);
+
+                    oDialog1.close();
+                }}));
+
+            oDialog1.addButton(new sap.m.Button({text: 'Добавить',
+                press:function () { 
+
+                    // Получить новые данные из модели
+                    var name = oModel.getProperty('/newName');
+                    var counter = oModel.getProperty('/newCounter');
+
+                    if (name &&
+                        counter &&
+                        !isNaN(counter) &&
+                        (counter > 0)
+                        ) {
+
+                        var categories = oModel.getProperty('/categories');
+
+                        // Добавить данные в модель
+                        categories.push({
+                            name: name,
+                            counter: Number(counter)
+                        });
+                    }
+
+                    // Удалить данные после сохранении в модели
+                    oModel.setProperty('/newName', null);
+                    oModel.setProperty('/newCounter', null);
+
+                    oDialog1.close();
+                }}));
+
+            oDialog1.open();
+        }
+    });
+
+    // Controller definition 4 Detail
+    sap.ui.controller('local.controller.Detail', {
+    });
+    var splitApp = new sap.m.SplitApp({
+        masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1').html()})],
+        detailPages: [sap.ui.xmlview('myView2', {viewContent:jQuery('#view2').html()})]
+    });
+    var shell = sap.m.Shell({
+        showLogout:false,
+        app:splitApp
+    })
+    // oView.setModel(new sap.ui.model.json.JSONModel("https://openui5.hana.ondemand.com/test-resources/sap/ui/demokit/explored/products.json"));
+    shell.placeAt('content');
+    </script>
 
     </head>
 
