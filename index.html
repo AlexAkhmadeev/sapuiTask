@@ -39,7 +39,7 @@
                     <subHeader>
                         <Toolbar id="searchBar" >
                             <content>
-                                <SearchField id="searchField" width="100%" placeholder="Поиск ..." showRefreshButton="true" />
+                                <SearchField id="searchField" width="100%" search="onFilterInvoices" placeholder="Поиск ..." showRefreshButton="true" />
                             </content>
                         </Toolbar>
                     </subHeader>
@@ -365,7 +365,25 @@
 
             oDialog1.open();
 
-        }
+        },
+        
+        /**
+         * Поиск по загаловкам категорий
+         * @param oEvent событие
+         */
+        onFilterInvoices: function (oEvent) {
+
+            var aFilter = [];
+            var sQuery = oEvent.getParameter('query');
+            if (sQuery) {
+                aFilter.push( new Filter('name',    
+                    sap.ui.model.FilterOperator.Contains, sQuery));
+            }
+
+            var oList = this.getView().byId('categoryList');
+            var oBinding = oList.getBinding('items');
+            oBinding.filter(aFilter);
+        },
     });
 
     // Controller definition 4 Detail
