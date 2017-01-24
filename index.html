@@ -87,6 +87,7 @@
                         <VBox id="idVBox" direction="Column" alignItems="Center">
                             <items>
                                 <IconTabBar
+                                    select="handleIconTabBarSelect"
                                     expanded="true"
                                     width="100%"
                                     id="idIconTabBar"
@@ -117,7 +118,12 @@
                                         key="Overweight" />
                                     </items>
                                     <content>
-                                        <List >
+                                        <List 
+                                            selectionChange="onSelectionChange"
+                                            includeItemInSelection="true"
+                                            id="goodsList"
+                                            items="{/goods}"
+                                            noDataText="Нет товаров">
                                             <headerToolbar>
                                               <Toolbar>
                                                 <Title text="Продукты" level="H2" />
@@ -142,29 +148,12 @@
                                             </infoToolbar>
                                             <items>
                                                 <StandardListItem
-                                                    title = "Power Projector 4713"
-                                                    description = "1239102"
-                                                    icon = "https://sapui5.hana.ondemand.com/sdk/test-resources/sap/ui/demokit/explored/img/HT-6100.jpg"
-                                                    iconDensityAware="false"
-                                                    iconInset="false" />
-                                                <StandardListItem
-                                                    title = "Gladiator MX"
-                                                    description = "2212-121-828"
-                                                    icon = "https://sapui5.hana.ondemand.com/sdk/test-resources/sap/ui/demokit/explored/img/HT-1071.jpg"
-                                                    iconDensityAware="false"
-                                                    iconInset="false" />
-                                                <StandardListItem
-                                                    title = "Hurricane GX"
-                                                    description = "K47322.1"
-                                                    icon = "https://sapui5.hana.ondemand.com/sdk/test-resources/sap/ui/demokit/explored/img/HT-1072.jpg"
-                                                    iconDensityAware="false"
-                                                    iconInset="false" />
-                                                <StandardListItem
-                                                    title = "Webcam"
-                                                    description = "22134T"
-                                                    icon = "https://sapui5.hana.ondemand.com/sdk/test-resources/sap/ui/demokit/explored/img/HT-1112.jpg"
-                                                    iconDensityAware="false"
-                                                    iconInset="false" />
+                                                    title = "{title}"
+                                                    description = "{description}"
+                                                    icon = "{icon}"
+                                                    iconDensityAware="{iconDensityAware}"
+                                                    iconInset="{iconInset}"
+                                                    press="onSelectItem" />
                                             </items>
                                         </List>
                                     </content>
@@ -366,7 +355,7 @@
             oDialog1.open();
 
         },
-        
+
         /**
          * Поиск по загаловкам категорий
          * @param oEvent событие
@@ -388,6 +377,85 @@
 
     // Controller definition 4 Detail
     sap.ui.controller('local.controller.Detail', {
+
+               /**
+        * Инициализация 
+        */
+        onInit: function () {
+
+            /**
+             * Модель товаров
+             * @type {JSONModel}
+             */
+            var oModel = new JSONModel({
+                goods: [
+                  {
+                    title: 'Power Projector 4713',
+                    description: '1239102',
+                    icon: 'https://sapui5.hana.ondemand.com/sdk/test-' +
+                          'resources/sap/ui/demokit/explored/img/HT-6100.jpg',
+                    iconDensityAware: false,
+                    iconInset: false,
+                    price: 399.99,
+                  },
+                  {
+                    title: 'Gladiator MX',
+                    description: '2212-121-828',
+                    icon: 'https://sapui5.hana.ondemand.com/sdk/test-' +
+                          'resources/sap/ui/demokit/explored/img/HT-1071.jpg',
+                    iconDensityAware: false,
+                    iconInset: false,
+                    price: 199.99,
+                  },
+                  {
+                    title: 'Hurricane GX',
+                    description: 'K47322.1',
+                    icon: 'https://sapui5.hana.ondemand.com/sdk/test-' + 
+                          'resources/sap/ui/demokit/explored/img/HT-1072.jpg',
+                    iconDensityAware: false,
+                    iconInset: false,
+                    price: 89.99,
+                  },
+                  {
+                    title: 'Webcam',
+                    description: '22134T',
+                    icon: 'https://sapui5.hana.ondemand.com/sdk/test-' + 
+                          'resources/sap/ui/demokit/explored/img/HT-1112.jpg',
+                    iconDensityAware: false,
+                    iconInset: false,
+                    price: 129.99,
+                  },
+                ]
+              });               
+
+            this._oList = this.getView().byId('goodsList');
+            this.getView().setModel(oModel);
+            
+        },
+
+         /**
+         * Обработчик переключения IconTabBar
+         * @param oEvent событие
+         */
+        handleIconTabBarSelect: function (oEvent) {
+
+            var oBinding = this._oList.getBinding('items');
+            var sKey = oEvent.getParameter('key');
+            var oFilter;
+            if (sKey === 'Ok') {
+                oFilter = new Filter('price', 'GT', 80);
+                oBinding.filter([oFilter]);
+            } else if (sKey === 'Heavy') {
+                oFilter = new Filter('price', 'LT', 80);
+                oBinding.filter([oFilter]);
+            } else if (sKey === 'Overweight') {
+                oFilter = new Filter('price', 'LT', 50);
+                oBinding.filter([oFilter]);
+            } else {
+                oBinding.filter([]);
+            }
+
+        },
     });
     var splitApp = new sap.m.SplitApp({
         masterPages: [sap.ui.xmlview('myView1', {viewContent:jQuery('#view1').html()})],
